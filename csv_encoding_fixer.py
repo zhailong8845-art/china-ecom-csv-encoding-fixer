@@ -50,9 +50,13 @@ def detect_delimiter(text: str) -> str:
         raise ValueError("could not detect comma, tab, semicolon, or pipe delimiter") from exc
 
 
-def normalize(input_path: Path, output_path: Path, output_encoding: str = "utf-8-sig") -> Result:
+def normalize(
+    input_path: Path, output_path: Path, output_encoding: str = "utf-8-sig", overwrite: bool = False
+) -> Result:
     if input_path.resolve() == output_path.resolve():
         raise ValueError("input and output paths must be different")
+    if output_path.exists() and not overwrite:
+        raise ValueError("output already exists; choose another path or pass --force")
     text, source_encoding = decode_csv(input_path.read_bytes())
     delimiter = detect_delimiter(text)
     rows = list(csv.reader(io.StringIO(text, newline=""), delimiter=delimiter))
@@ -72,7 +76,7 @@ def normalize(input_path: Path, output_path: Path, output_encoding: str = "utf-8
 
 
 def normalize_directory(
-    input_dir: Path, output_dir: Path, output_encoding: str = "utf-8-sig"
+    input_dir: Path, output_dir: Path, output_encoding: str = "utf-8-sig", overwrite: bool = False
 ) -> tuple[list[Result], list[dict[str, str]]]:
     if not input_dir.is_dir():
         raise ValueError("batch input must be an existing directory")
@@ -88,7 +92,7 @@ def normalize_directory(
     for source in files:
         target = output_dir / source.name
         try:
-            results.append(normalize(source, target, output_encoding))
+            results.append(normalize(source, target, output_encoding, overwrite))
         except (OSError, ValueError) as exc:
             errors.append({"input": str(source), "error": str(exc)})
     return results, errors
@@ -100,13 +104,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("output", type=Path)
     parser.add_argument("--output-encoding", choices=("utf-8-sig", "gb18030"), default="utf-8-sig")
     parser.add_argument("--batch", action="store_true", help="process up to 100 CSV files from input directory")
+    parser.add_argument("--force", action="store_true", help="allow replacing existing output files")
     parser.add_argument("--json", action="store_true", help="print an audit result as JSON")
     args = parser.parse_args(argv)
     try:
         if args.batch:
-            results, errors = normalize_directory(args.input, args.output, args.output_encoding)
+            results, errors = normalize_directory(args.input, args.output, args.output_encoding, args.force)
         else:
-            result = normalize(args.input, args.output, args.output_encoding)
+            result = normalize(args.input, args.output, args.output_encoding, args.force)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     if args.batch:

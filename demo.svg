@@ -8,6 +8,6 @@
   <text x="52" y="226" fill="#a7f3d0" font-family="ui-monospace, Menlo, monospace" font-size="18">"delimiters": ["tab", ";"],</text>
   <text x="52" y="260" fill="#fde68a" font-family="ui-monospace, Menlo, monospace" font-size="18">"output_encoding": "utf-8-sig"</text>
   <text x="32" y="294" fill="#d1d5db" font-family="ui-monospace, Menlo, monospace" font-size="18">}</text>
-  <text x="32" y="354" fill="#f9fafb" font-family="ui-monospace, Menlo, monospace" font-size="19">✓ 中文保留  ✓ Excel BOM  ✓ 原文件不修改  ✓ 零上传</text>
-  <text x="32" y="397" fill="#64748b" font-family="ui-monospace, Menlo, monospace" font-size="16">China E-commerce CSV Encoding Fixer v1.1.0</text>
+  <text x="32" y="354" fill="#f9fafb" font-family="ui-monospace, Menlo, monospace" font-size="19">✓ 拖放即用  ✓ 不覆盖输出  ✓ 原文件不修改  ✓ 零上传</text>
+  <text x="32" y="397" fill="#64748b" font-family="ui-monospace, Menlo, monospace" font-size="16">China E-commerce CSV Encoding Fixer v1.2.0</text>
 </svg>

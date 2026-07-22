@@ -13,9 +13,11 @@ python3 csv_encoding_fixer.py examples/taobao-gb18030.csv fixed.csv --json
 或安装 wheel：
 
 ```bash
-python3 -m pip install china_ecom_csv_encoding_fixer-1.1.0-py3-none-any.whl
+python3 -m pip install china_ecom_csv_encoding_fixer-1.2.0-py3-none-any.whl
 ecom-csv-fix orders.csv fixed.csv
 ```
+
+不熟悉命令行时，可把单个 CSV 拖到 `run-windows.bat` 或 `run-macos.command` 上。启动器会在原文件旁生成 `原文件名-fixed.csv`，不会覆盖原文件或已存在的修复结果。Windows 需要 Python Launcher（`py -3`）或 `python`，macOS 需要 `python3`。
 
 整目录批量修复（最多 100 个 CSV，输出逐文件 JSON 证据）：
 
@@ -47,6 +49,7 @@ ecom-csv-fix platform-exports/ fixed/ --batch --json > batch-audit.json
 - 保留引号内逗号、换行和中文。
 - 不猜测或修复缺失字段；行列数不一致时不生成部分结果。
 - 批量模式最多处理 100 个文件，并对每个成功或失败项留下审计记录。
+- 默认拒绝覆盖任何已存在输出；只有明确传入 `--force` 才允许替换。
 
 ## 测试
 

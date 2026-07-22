@@ -58,6 +58,27 @@ class EncodingFixerTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "different"):
                 normalize(source, source)
 
+    def test_rejects_existing_output_without_force(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "orders.csv"
+            target = Path(directory) / "fixed.csv"
+            source.write_text("订单号,金额\n1,5\n", encoding="utf-8")
+            target.write_text("keep me", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "output already exists"):
+                normalize(source, target)
+            self.assertEqual(target.read_text(encoding="utf-8"), "keep me")
+            normalize(source, target, overwrite=True)
+            self.assertTrue(target.read_bytes().startswith(b"\xef\xbb\xbf"))
+
+    def test_drag_drop_launchers_are_fail_closed(self):
+        root = Path(__file__).parent
+        windows = (root / "run-windows.bat").read_text(encoding="utf-8")
+        macos = (root / "run-macos.command").read_text(encoding="utf-8")
+        self.assertIn("%~dpn1-fixed.csv", windows)
+        self.assertIn("${input%.*}-fixed.csv", macos)
+        self.assertNotIn("--force", windows)
+        self.assertNotIn("--force", macos)
+
     def test_batch_normalizes_multiple_encodings(self):
         with tempfile.TemporaryDirectory() as directory:
             source_dir = Path(directory) / "exports"
