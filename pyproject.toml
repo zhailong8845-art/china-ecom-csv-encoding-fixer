@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "china-ecom-csv-encoding-fixer"
+version = "1.0.0"
+description = "Normalize Chinese e-commerce CSV encodings and delimiters"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{name = "zhailong8845-art"}]
+dependencies = []
+
+[project.scripts]
+ecom-csv-fix = "csv_encoding_fixer:main"
+
+[tool.setuptools]
+py-modules = ["csv_encoding_fixer"]
