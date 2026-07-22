@@ -1,0 +1,54 @@
+name: CSV Encoding Guard
+description: Normalize UTF-8/GB18030 CSV files and fail CI on malformed rows without uploading data
+author: zhailong8845-art
+branding:
+  icon: file-text
+  color: green
+inputs:
+  input:
+    description: Input CSV file or directory, relative to the repository workspace
+    required: false
+    default: .
+  output:
+    description: Output file or directory, relative to the repository workspace
+    required: false
+    default: fixed-csv
+  batch:
+    description: Process up to 100 CSV files from the input directory
+    required: false
+    default: "true"
+  output-encoding:
+    description: Output encoding (utf-8-sig or gb18030)
+    required: false
+    default: utf-8-sig
+  force:
+    description: Allow replacing existing output files
+    required: false
+    default: "false"
+  report:
+    description: JSON audit report path, relative to the repository workspace
+    required: false
+    default: csv-encoding-audit.json
+outputs:
+  report:
+    description: Path to the JSON audit report
+    value: ${{ steps.guard.outputs.report }}
+  processed:
+    description: Number of successfully processed CSV files
+    value: ${{ steps.guard.outputs.processed }}
+  failed:
+    description: Number of failed CSV files
+    value: ${{ steps.guard.outputs.failed }}
+runs:
+  using: composite
+  steps:
+    - id: guard
+      shell: bash
+      env:
+        CSV_GUARD_INPUT: ${{ inputs.input }}
+        CSV_GUARD_OUTPUT: ${{ inputs.output }}
+        CSV_GUARD_BATCH: ${{ inputs.batch }}
+        CSV_GUARD_OUTPUT_ENCODING: ${{ inputs.output-encoding }}
+        CSV_GUARD_FORCE: ${{ inputs.force }}
+        CSV_GUARD_REPORT: ${{ inputs.report }}
+      run: python3 "${{ github.action_path }}/action_entry.py"

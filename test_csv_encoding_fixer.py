@@ -1,4 +1,8 @@
 import csv
+import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -78,6 +82,67 @@ class EncodingFixerTest(unittest.TestCase):
         self.assertIn("${input%.*}-fixed.csv", macos)
         self.assertNotIn("--force", windows)
         self.assertNotIn("--force", macos)
+
+    def test_github_action_entry_writes_audit_and_outputs(self):
+        root = Path(__file__).parent
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = workspace / "exports"
+            source.mkdir()
+            (source / "orders.csv").write_bytes("订单号;金额\n1;5\n".encode("gb18030"))
+            github_output = workspace / "github-output.txt"
+            environment = os.environ | {
+                "GITHUB_WORKSPACE": str(workspace),
+                "GITHUB_OUTPUT": str(github_output),
+                "CSV_GUARD_INPUT": "exports",
+                "CSV_GUARD_OUTPUT": "fixed",
+                "CSV_GUARD_BATCH": "true",
+                "CSV_GUARD_REPORT": "audit.json",
+            }
+            process = subprocess.run(
+                [sys.executable, str(root / "action_entry.py")], env=environment, text=True, capture_output=True
+            )
+            self.assertEqual(process.returncode, 0, process.stderr)
+            audit = json.loads((workspace / "audit.json").read_text(encoding="utf-8"))
+            self.assertEqual((audit["processed"], audit["failed"]), (1, 0))
+            self.assertIn("processed=1", github_output.read_text(encoding="utf-8"))
+
+    def test_github_action_entry_fails_closed_with_report(self):
+        root = Path(__file__).parent
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            source = workspace / "exports"
+            source.mkdir()
+            (source / "broken.csv").write_text("订单号,金额\n1\n", encoding="utf-8")
+            environment = os.environ | {
+                "GITHUB_WORKSPACE": str(workspace),
+                "CSV_GUARD_INPUT": "exports",
+                "CSV_GUARD_OUTPUT": "fixed",
+                "CSV_GUARD_BATCH": "true",
+                "CSV_GUARD_REPORT": "audit.json",
+            }
+            process = subprocess.run(
+                [sys.executable, str(root / "action_entry.py")], env=environment, text=True, capture_output=True
+            )
+            self.assertEqual(process.returncode, 2)
+            audit = json.loads((workspace / "audit.json").read_text(encoding="utf-8"))
+            self.assertEqual((audit["processed"], audit["failed"]), (0, 1))
+            self.assertIn("row 2", audit["errors"][0]["error"])
+
+    def test_github_action_rejects_workspace_escape(self):
+        root = Path(__file__).parent
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory)
+            environment = os.environ | {
+                "GITHUB_WORKSPACE": str(workspace),
+                "CSV_GUARD_INPUT": "../outside.csv",
+                "CSV_GUARD_REPORT": "audit.json",
+            }
+            process = subprocess.run(
+                [sys.executable, str(root / "action_entry.py")], env=environment, text=True, capture_output=True
+            )
+            self.assertNotEqual(process.returncode, 0)
+            self.assertIn("must stay inside GITHUB_WORKSPACE", process.stderr)
 
     def test_batch_normalizes_multiple_encodings(self):
         with tempfile.TemporaryDirectory() as directory:

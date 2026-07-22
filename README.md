@@ -19,6 +19,20 @@ ecom-csv-fix orders.csv fixed.csv
 
 不熟悉命令行时，可把单个 CSV 拖到 `run-windows.bat` 或 `run-macos.command` 上。启动器会在原文件旁生成 `原文件名-fixed.csv`，不会覆盖原文件或已存在的修复结果。Windows 需要 Python Launcher（`py -3`）或 `python`，macOS 需要 `python3`。
 
+## GitHub Action
+
+在公开或私有仓库中自动检查 CSV（数据只在 GitHub runner 内处理）：
+
+```yaml
+- uses: zhailong8845-art/china-ecom-csv-encoding-fixer@v1.3.0
+  with:
+    input: exports
+    output: fixed-csv
+    batch: "true"
+```
+
+Action 会生成 `csv-encoding-audit.json`，输出 `processed`、`failed` 和 `report`，并在任何文件格式错误或输出冲突时使 job 失败。固定价安装服务为 **RMB 39 / USD 5**：针对一个客户有权提供的公开仓库，交付最小 workflow、合成 CSV 验证和一次复检；不接受真实订单、凭据或付款信息。
+
 整目录批量修复（最多 100 个 CSV，输出逐文件 JSON 证据）：
 
 ```bash
