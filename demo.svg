@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430">
   <rect width="960" height="430" rx="18" fill="#101827"/>
   <circle cx="34" cy="30" r="7" fill="#ff5f57"/><circle cx="58" cy="30" r="7" fill="#febc2e"/><circle cx="82" cy="30" r="7" fill="#28c840"/>
-  <text x="32" y="82" fill="#93c5fd" font-family="ui-monospace, Menlo, monospace" font-size="19">$ ecom-csv-fix taobao-gb18030.csv fixed.csv --json</text>
+  <text x="32" y="82" fill="#93c5fd" font-family="ui-monospace, Menlo, monospace" font-size="19">$ ecom-csv-fix platform-exports/ fixed/ --batch --json</text>
   <text x="32" y="124" fill="#d1d5db" font-family="ui-monospace, Menlo, monospace" font-size="18">{</text>
-  <text x="52" y="158" fill="#a7f3d0" font-family="ui-monospace, Menlo, monospace" font-size="18">"source_encoding": "gb18030",</text>
-  <text x="52" y="192" fill="#a7f3d0" font-family="ui-monospace, Menlo, monospace" font-size="18">"source_delimiter": ";",</text>
-  <text x="52" y="226" fill="#a7f3d0" font-family="ui-monospace, Menlo, monospace" font-size="18">"output_encoding": "utf-8-sig",</text>
-  <text x="52" y="260" fill="#fde68a" font-family="ui-monospace, Menlo, monospace" font-size="18">"rows": 3, "columns": 4</text>
+  <text x="52" y="158" fill="#a7f3d0" font-family="ui-monospace, Menlo, monospace" font-size="18">"processed": 2, "failed": 0,</text>
+  <text x="52" y="192" fill="#a7f3d0" font-family="ui-monospace, Menlo, monospace" font-size="18">"encodings": ["utf-8", "gb18030"],</text>
+  <text x="52" y="226" fill="#a7f3d0" font-family="ui-monospace, Menlo, monospace" font-size="18">"delimiters": ["tab", ";"],</text>
+  <text x="52" y="260" fill="#fde68a" font-family="ui-monospace, Menlo, monospace" font-size="18">"output_encoding": "utf-8-sig"</text>
   <text x="32" y="294" fill="#d1d5db" font-family="ui-monospace, Menlo, monospace" font-size="18">}</text>
   <text x="32" y="354" fill="#f9fafb" font-family="ui-monospace, Menlo, monospace" font-size="19">✓ 中文保留  ✓ Excel BOM  ✓ 原文件不修改  ✓ 零上传</text>
-  <text x="32" y="397" fill="#64748b" font-family="ui-monospace, Menlo, monospace" font-size="16">China E-commerce CSV Encoding Fixer v1.0.0</text>
+  <text x="32" y="397" fill="#64748b" font-family="ui-monospace, Menlo, monospace" font-size="16">China E-commerce CSV Encoding Fixer v1.1.0</text>
 </svg>

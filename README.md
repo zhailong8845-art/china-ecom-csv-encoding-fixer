@@ -13,9 +13,19 @@ python3 csv_encoding_fixer.py examples/taobao-gb18030.csv fixed.csv --json
 或安装 wheel：
 
 ```bash
-python3 -m pip install china_ecom_csv_encoding_fixer-1.0.0-py3-none-any.whl
+python3 -m pip install china_ecom_csv_encoding_fixer-1.1.0-py3-none-any.whl
 ecom-csv-fix orders.csv fixed.csv
 ```
+
+整目录批量修复（最多 100 个 CSV，输出逐文件 JSON 证据）：
+
+```bash
+ecom-csv-fix platform-exports/ fixed/ --batch --json > batch-audit.json
+```
+
+批量模式只读取输入目录第一层的 `.csv` 文件。坏文件不会生成部分输出，也不会阻止其他合格文件完成；只要有一个文件失败，命令退出码就是 `2`，审计 JSON 会记录具体文件和原因。
+
+[查看两份真实编码/分隔符示例的批量审计结果](examples/batch-audit.json)。
 
 输出示例：
 
@@ -36,6 +46,7 @@ ecom-csv-fix orders.csv fixed.csv
 - 输出：默认 UTF-8 BOM；可用 `--output-encoding gb18030`。
 - 保留引号内逗号、换行和中文。
 - 不猜测或修复缺失字段；行列数不一致时不生成部分结果。
+- 批量模式最多处理 100 个文件，并对每个成功或失败项留下审计记录。
 
 ## 测试
 

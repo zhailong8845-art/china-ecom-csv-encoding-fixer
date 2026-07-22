@@ -12,6 +12,7 @@ from pathlib import Path
 
 ENCODINGS = ("utf-8-sig", "utf-8", "gb18030")
 DELIMITERS = (",", "\t", ";", "|")
+MAX_BATCH_FILES = 100
 
 
 @dataclass(frozen=True)
@@ -26,7 +27,9 @@ class Result:
 
 
 def decode_csv(data: bytes) -> tuple[str, str]:
-    for encoding in ENCODINGS:
+    if data.startswith(b"\xef\xbb\xbf"):
+        return data.decode("utf-8-sig"), "utf-8-sig"
+    for encoding in ("utf-8", "gb18030"):
         try:
             return data.decode(encoding), encoding
         except UnicodeDecodeError:
@@ -68,17 +71,60 @@ def normalize(input_path: Path, output_path: Path, output_encoding: str = "utf-8
     return Result(str(input_path), str(output_path), source_encoding, delimiter, output_encoding, len(rows), width)
 
 
+def normalize_directory(
+    input_dir: Path, output_dir: Path, output_encoding: str = "utf-8-sig"
+) -> tuple[list[Result], list[dict[str, str]]]:
+    if not input_dir.is_dir():
+        raise ValueError("batch input must be an existing directory")
+    if input_dir.resolve() == output_dir.resolve():
+        raise ValueError("batch input and output directories must be different")
+    files = sorted(path for path in input_dir.iterdir() if path.is_file() and path.suffix.lower() == ".csv")
+    if not files:
+        raise ValueError("batch input contains no CSV files")
+    if len(files) > MAX_BATCH_FILES:
+        raise ValueError(f"batch contains {len(files)} CSV files; maximum is {MAX_BATCH_FILES}")
+    results: list[Result] = []
+    errors: list[dict[str, str]] = []
+    for source in files:
+        target = output_dir / source.name
+        try:
+            results.append(normalize(source, target, output_encoding))
+        except (OSError, ValueError) as exc:
+            errors.append({"input": str(source), "error": str(exc)})
+    return results, errors
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Fix Chinese e-commerce CSV encoding and delimiters")
     parser.add_argument("input", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--output-encoding", choices=("utf-8-sig", "gb18030"), default="utf-8-sig")
+    parser.add_argument("--batch", action="store_true", help="process up to 100 CSV files from input directory")
     parser.add_argument("--json", action="store_true", help="print an audit result as JSON")
     args = parser.parse_args(argv)
     try:
-        result = normalize(args.input, args.output, args.output_encoding)
+        if args.batch:
+            results, errors = normalize_directory(args.input, args.output, args.output_encoding)
+        else:
+            result = normalize(args.input, args.output, args.output_encoding)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
+    if args.batch:
+        payload = {
+            "input_directory": str(args.input),
+            "output_directory": str(args.output),
+            "processed": len(results),
+            "failed": len(errors),
+            "results": [asdict(item) for item in results],
+            "errors": errors,
+        }
+        if args.json:
+            print(json.dumps(payload, ensure_ascii=False, indent=2))
+        else:
+            print(f"Fixed {len(results)} CSV file(s); {len(errors)} failed. Output: {args.output}")
+            for error in errors:
+                print(f"FAILED {error['input']}: {error['error']}")
+        return 0 if not errors else 2
     if args.json:
         print(json.dumps(asdict(result), ensure_ascii=False, indent=2))
     else:

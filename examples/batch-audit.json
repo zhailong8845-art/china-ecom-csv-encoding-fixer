@@ -1,0 +1,27 @@
+{
+  "input_directory": "examples/batch-input",
+  "output_directory": "examples/batch-output",
+  "processed": 2,
+  "failed": 0,
+  "results": [
+    {
+      "input": "examples/batch-input/jd.csv",
+      "output": "examples/batch-output/jd.csv",
+      "source_encoding": "utf-8",
+      "source_delimiter": "\t",
+      "output_encoding": "utf-8-sig",
+      "rows": 3,
+      "columns": 3
+    },
+    {
+      "input": "examples/batch-input/taobao.csv",
+      "output": "examples/batch-output/taobao.csv",
+      "source_encoding": "gb18030",
+      "source_delimiter": ";",
+      "output_encoding": "utf-8-sig",
+      "rows": 3,
+      "columns": 4
+    }
+  ],
+  "errors": []
+}
